@@ -1,0 +1,13 @@
+﻿[
+  {
+    "outputFileName": "app/app.js",
+    "inputFiles": [
+      "!app/app.js",
+      "app/app.module.js",
+      "app/*.js",
+      "app/*/*.js",
+      "app/*/*/*.js"
+    ],
+    "includeInProject": false
+  }
+]
