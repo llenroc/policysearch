@@ -1,3 +1,11 @@
-﻿<div class="contrainer" ng-controller="homeController as home">
-    {{home.title}}
+﻿<div ng-controller="homeController as home">
+    <h1>{{home.title}}</h1>
+    <form id="searchForm" class="form" ng-submit="home.search(searchForm)">
+        <div class="form-group">
+            <input type="text" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" value="Search" />
+        </div>
+    </form>
 </div>
