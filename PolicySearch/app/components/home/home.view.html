@@ -1,8 +1,8 @@
 ﻿<div ng-controller="homeController as home">
     <h1>{{home.title}}</h1>
-    <form id="searchForm" class="form" ng-submit="home.search(searchForm)">
+    <form name="searchForm" class="form" ng-submit="home.search(searchForm)">
         <div class="form-group">
-            <input type="text" class="form-control" required />
+            <input type="text" class="form-control" ng-model="home.searchPhrase" required />
         </div>
         <div class="form-group">
             <input type="submit" class="btn btn-primary" value="Search" />

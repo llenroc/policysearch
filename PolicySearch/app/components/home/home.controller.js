@@ -21,6 +21,7 @@
 
             DataService.getPolicies(vm.searchPhrase,
                 function (data, status) {
+                    console.log("data", data, "status", status);
                     vm.results = data;
                 },
                 function (data, status) {

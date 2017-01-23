@@ -8,6 +8,11 @@ using System.Web.Http;
 namespace PolicySearch.Controllers
 {
     public class PolicyController : ApiController
-    {
+    {        
+        [HttpPost]
+        public IHttpActionResult PostPolicies(Models.SearchDetails searchDetails)
+        {
+            return Ok();
+        }
     }
 }
