@@ -161,10 +161,12 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Configuration\AzureSearchConfig.cs" />
+    <Compile Include="Configuration\LuisConfig.cs" />
     <Compile Include="Controllers\PolicyController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CognitiveResult.cs" />
     <Compile Include="Models\Policy.cs" />
     <Compile Include="Models\SearchDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
