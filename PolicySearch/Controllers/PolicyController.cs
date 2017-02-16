@@ -9,6 +9,8 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Newtonsoft.Json;
+using Microsoft.Azure.Search;
+using Microsoft.Azure.Search.Models;
 
 namespace PolicySearch.Controllers
 {
@@ -16,37 +18,59 @@ namespace PolicySearch.Controllers
     {
         [ResponseType(typeof(List<Models.Policy>))]
         [HttpPost]
-        public IHttpActionResult PostPolicies(Models.SearchDetails searchDetails)
+        public async Task<IHttpActionResult> PostPolicies(Models.SearchDetails searchDetails)
         {
-            MakeRequest(searchDetails.SearchPhrase);
-            return Ok();
-        }        
+            var request = await MakeRequest(searchDetails.SearchPhrase);
+
+            var result = SearchPolicies(request);
+
+            return result;
+        }
 
         private async Task<Models.CognitiveResult> MakeRequest(string searchPhrase)
         {
-            try
+            var config = (Configuration.LuisConfig)ConfigurationManager.GetSection("azureSettings/luis");
+
+            var client = new HttpClient();
+            var queryString = HttpUtility.ParseQueryString("q=" + searchPhrase);
+
+            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config.SubscriptionKey);
+
+            var uri = $"https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/{config.AppId}?" + queryString;
+
+            var response = await client.GetAsync(uri);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var result = JsonConvert.DeserializeObject<Models.CognitiveResult>(json);
+
+            return result;
+        }
+
+        private IHttpActionResult SearchPolicies(Models.CognitiveResult cognitiveResults)
+        {
+            var intent = cognitiveResults.TopScoringIntent;
+
+            var involvesGovernment = cognitiveResults.Entities.Any(entity => entity.Entity == "government official");
+
+            if (intent.Intent == "GiveReference")
             {
-                var config = (Configuration.LuisConfig)ConfigurationManager.GetSection("azureSettings/luis");
+                var appSettings = ConfigurationManager.AppSettings;
 
-                var client = new HttpClient();
-                var queryString = HttpUtility.ParseQueryString("q=" +searchPhrase);
+                var azureSearchKey = appSettings["AzureSearchKey"];
+                var azureSearchName = appSettings["AzureSearchName"];
+                var azureSearchIndex = appSettings["AzureSearchIndex"];
 
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config.SubscriptionKey);
+                var service = new SearchServiceClient(azureSearchName, new SearchCredentials(azureSearchKey));
+                var indexClient = service.Indexes.GetClient(azureSearchIndex);
 
-                var uri = $"https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/{config.AppId}?" + queryString;
+                //var response = indexClient.Documents.Search<Models.Policy>(searchPhrase);
 
-                var response = await client.GetAsync(uri);
-
-                var json = await response.Content.ReadAsStringAsync();       
-                
-                var result = JsonConvert.DeserializeObject<Models.CognitiveResult>(json);
-
-                return result;
+                //return response.Results.Select(result => result.Document).ToList();
+           
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
+
+            return Ok();
         }
     }
 }
